@@ -5,10 +5,13 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminStaffController;
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\HomeSectionController;
 use App\Http\Controllers\Admin\OptionTypeController;
 use App\Http\Controllers\Admin\OptionValueController;
+use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\ProductVariantController;
@@ -85,6 +88,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
             Route::get('inventory/{variant}/history', [AdminInventoryController::class, 'history'])->name('inventory.history');
             Route::post('inventory/{variant}/adjust', [AdminInventoryController::class, 'adjust'])->name('inventory.adjust');
+        });
+
+        Route::middleware('permission:content.manage')->group(function () {
+            Route::resource('banners', BannerController::class)->except(['show']);
+
+            Route::get('home-sections', [HomeSectionController::class, 'index'])->name('home-sections.index');
+            Route::put('home-sections', [HomeSectionController::class, 'update'])->name('home-sections.update');
+
+            Route::get('pages', [PageController::class, 'index'])->name('pages.index');
+            Route::get('pages/{page}/edit', [PageController::class, 'edit'])->name('pages.edit');
+            Route::put('pages/{page}', [PageController::class, 'update'])->name('pages.update');
         });
     });
 });

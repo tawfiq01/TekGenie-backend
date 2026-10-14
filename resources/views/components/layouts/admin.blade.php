@@ -14,6 +14,14 @@
         ],
         ['label' => 'Inventory', 'route' => 'admin.inventory.index', 'show' => $adminUser?->can('inventory.adjust')],
         [
+            'label' => 'Marketing',
+            'items' => collect([
+                ['label' => 'Banners', 'route' => 'admin.banners.index', 'show' => $adminUser?->can('content.manage')],
+                ['label' => 'Home sections', 'route' => 'admin.home-sections.index', 'show' => $adminUser?->can('content.manage')],
+                ['label' => 'Pages', 'route' => 'admin.pages.index', 'show' => $adminUser?->can('content.manage')],
+            ])->filter(fn ($item) => $item['show']),
+        ],
+        [
             'label' => 'Access',
             'items' => collect([
                 ['label' => 'Staff', 'route' => 'admin.staff.index', 'show' => $adminUser?->can('staff.manage')],

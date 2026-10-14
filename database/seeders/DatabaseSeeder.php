@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             SuperAdminSeeder::class,
             SettingsSeeder::class,
             PageSeeder::class,
+            HomeSectionSeeder::class,
         ]);
 
         if (! app()->isProduction()) {

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\BannerFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
@@ -11,6 +13,9 @@ use Illuminate\Support\Carbon;
  */
 class Banner extends Model
 {
+    /** @use HasFactory<BannerFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'placement', 'title', 'subtitle', 'button_label', 'link_url',
         'image_desktop_path', 'image_mobile_path', 'alt_text',

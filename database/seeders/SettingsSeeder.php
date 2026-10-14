@@ -25,6 +25,8 @@ class SettingsSeeder extends Seeder
                 'order_number_prefix' => 'ST',
                 'currency_symbol' => '৳',
                 'low_stock_default_threshold' => '5',
+                'announcement_text' => '',
+                'announcement_link' => '',
             ],
             'checkout' => [
                 'min_order_value' => '0',
