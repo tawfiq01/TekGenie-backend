@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\DeliveryZoneController;
 use App\Http\Controllers\Admin\HomeSectionController;
 use App\Http\Controllers\Admin\OptionTypeController;
 use App\Http\Controllers\Admin\OptionValueController;
@@ -99,6 +101,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('pages', [PageController::class, 'index'])->name('pages.index');
             Route::get('pages/{page}/edit', [PageController::class, 'edit'])->name('pages.edit');
             Route::put('pages/{page}', [PageController::class, 'update'])->name('pages.update');
+        });
+
+        Route::middleware('permission:shipping.manage')->group(function () {
+            Route::get('delivery-zones/districts', [DeliveryZoneController::class, 'districts'])->name('delivery-zones.districts');
+            Route::put('delivery-zones/districts', [DeliveryZoneController::class, 'assignDistricts'])->name('delivery-zones.districts.assign');
+            Route::post('delivery-zones/areas', [DeliveryZoneController::class, 'storeArea'])->name('delivery-zones.areas.store');
+
+            Route::resource('delivery-zones', DeliveryZoneController::class)
+                ->only(['index', 'create', 'store', 'edit', 'update'])
+                ->parameters(['delivery-zones' => 'deliveryZone']);
+        });
+
+        Route::middleware('permission:coupons.manage')->group(function () {
+            Route::resource('coupons', CouponController::class)->only(['index', 'create', 'store', 'edit', 'update']);
         });
     });
 });

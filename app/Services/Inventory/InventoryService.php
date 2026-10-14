@@ -54,7 +54,7 @@ class InventoryService
         StockMovementType $type,
         int $delta,
         string $reason,
-        Admin $actor,
+        ?Admin $actor,
         ?int $orderId = null,
         ?int $orderReturnId = null,
     ): StockMovement {
@@ -79,7 +79,7 @@ class InventoryService
                 'reason' => $reason,
                 'order_id' => $orderId,
                 'order_return_id' => $orderReturnId,
-                'admin_id' => $actor->id,
+                'admin_id' => $actor?->id,
             ]);
 
             $this->variants->recalcProductAggregates($locked->product);

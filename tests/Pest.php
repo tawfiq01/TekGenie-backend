@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Services\Catalog\VariantService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -49,4 +51,19 @@ function makeVisibleProduct(array $attributes = [], array $variantAttributes = [
     app(VariantService::class)->recalcProductAggregates($product);
 
     return $product->refresh();
+}
+
+/**
+ * A simple, saleable ProductVariant on its own fresh product/category — for
+ * cart/checkout tests that only care about one variant's price and stock.
+ *
+ * @param  array<string, mixed>  $attributes
+ */
+function makeVariant(array $attributes = []): ProductVariant
+{
+    $product = Product::factory()->active()->create(['category_id' => Category::factory()->create()->id]);
+
+    return $product->variants()->create(array_merge([
+        'sku' => 'SKU-'.$product->id, 'price' => 500, 'stock' => 10, 'is_active' => true, 'option_signature' => '',
+    ], $attributes));
 }

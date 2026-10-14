@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property CouponType $type
+ * @property string $value
+ * @property string|null $max_discount
+ */
 class Coupon extends Model
 {
     use SoftDeletes;

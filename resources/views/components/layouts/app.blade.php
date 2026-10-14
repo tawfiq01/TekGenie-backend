@@ -4,6 +4,7 @@
     $footerPages = \App\Models\Page::query()->where('is_published', true)->where('show_in_footer', true)->orderBy('title')->get();
     $contactPhone = \App\Models\Setting::get('store', 'contact_phone');
     $contactEmail = \App\Models\Setting::get('store', 'contact_email');
+    $cartSummary = app(\App\Services\Cart\CartService::class)->summary();
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
@@ -42,6 +43,12 @@
             </form>
 
             <div class="ml-auto flex items-center gap-4 text-sm">
+                <a href="{{ route('cart.show') }}" class="flex items-center gap-1 text-ink-soft hover:text-ink">
+                    Cart ({{ $cartSummary['count'] }})
+                    @if ($cartSummary['count'] > 0)
+                        <span class="text-ink">· ৳{{ $cartSummary['subtotal'] }}</span>
+                    @endif
+                </a>
                 @auth
                     <a href="{{ route('account.dashboard') }}" class="text-ink-soft hover:text-ink">My account</a>
                 @else

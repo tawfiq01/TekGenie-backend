@@ -94,6 +94,31 @@
                 <p class="mt-6 text-ink-soft">{{ $product->short_description }}</p>
             @endif
 
+            <form method="POST" action="{{ route('cart.store') }}" class="mt-6 flex items-center gap-3" x-data="{ quantity: 1 }">
+                @csrf
+                <input type="hidden" name="product_variant_id" :value="currentVariant?.id">
+
+                <div class="flex items-center rounded-[var(--radius-pill)] border border-border">
+                    <button type="button" @click="quantity = Math.max(1, quantity - 1)" class="px-3 py-2 text-ink-soft">&minus;</button>
+                    <input type="number" name="quantity" x-model.number="quantity" min="1" class="w-12 border-0 bg-transparent text-center text-sm focus:outline-none">
+                    <button type="button" @click="quantity = quantity + 1" class="px-3 py-2 text-ink-soft">&plus;</button>
+                </div>
+
+                <button
+                    type="submit"
+                    :disabled="!currentVariant || currentVariant.stock < 1"
+                    class="flex-1 rounded-[var(--radius-pill)] bg-ink px-6 py-2.5 text-sm font-semibold text-white hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                    Add to cart
+                </button>
+            </form>
+            @error('quantity')
+                <p class="mt-2 text-sm text-danger">{{ $message }}</p>
+            @enderror
+            @error('product_variant_id')
+                <p class="mt-2 text-sm text-danger">{{ $message }}</p>
+            @enderror
+
             <div class="mt-8 border-t border-border">
                 <div class="flex gap-6 border-b border-border text-sm">
                     <button type="button" @click="activeTab = 'description'" :class="activeTab === 'description' ? 'border-b-2 border-ink text-ink' : 'text-ink-soft'" class="py-3">Description</button>

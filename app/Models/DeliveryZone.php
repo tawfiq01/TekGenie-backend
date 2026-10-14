@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string $base_charge
+ * @property string|null $free_delivery_threshold
+ */
 class DeliveryZone extends Model
 {
     protected $fillable = [

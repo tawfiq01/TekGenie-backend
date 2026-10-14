@@ -16,9 +16,16 @@
         [
             'label' => 'Marketing',
             'items' => collect([
+                ['label' => 'Coupons', 'route' => 'admin.coupons.index', 'show' => $adminUser?->can('coupons.manage')],
                 ['label' => 'Banners', 'route' => 'admin.banners.index', 'show' => $adminUser?->can('content.manage')],
                 ['label' => 'Home sections', 'route' => 'admin.home-sections.index', 'show' => $adminUser?->can('content.manage')],
                 ['label' => 'Pages', 'route' => 'admin.pages.index', 'show' => $adminUser?->can('content.manage')],
+            ])->filter(fn ($item) => $item['show']),
+        ],
+        [
+            'label' => 'Settings',
+            'items' => collect([
+                ['label' => 'Delivery zones', 'route' => 'admin.delivery-zones.index', 'show' => $adminUser?->can('shipping.manage')],
             ])->filter(fn ($item) => $item['show']),
         ],
         [
