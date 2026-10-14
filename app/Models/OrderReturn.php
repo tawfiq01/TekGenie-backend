@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\ReturnType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/** @property ReturnType $type */
 class OrderReturn extends Model
 {
     protected $fillable = ['order_id', 'type', 'reason', 'processed_by', 'processed_at'];
@@ -13,6 +15,7 @@ class OrderReturn extends Model
     protected function casts(): array
     {
         return [
+            'type' => ReturnType::class,
             'processed_at' => 'datetime',
         ];
     }

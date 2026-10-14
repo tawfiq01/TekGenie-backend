@@ -37,6 +37,11 @@ class SettingsSeeder extends Seeder
             'shipping' => [
                 'allow_unassigned_delivery' => '0',
             ],
+            'payments' => [
+                'cod_enabled' => '1',
+                'cod_display_name' => 'Cash on Delivery',
+                'cod_instructions' => '',
+            ],
             'seo' => [
                 'default_meta_title_pattern' => '{title} | [Store Name]',
                 'default_meta_description' => '',

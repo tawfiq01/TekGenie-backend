@@ -3,11 +3,17 @@
 namespace App\Models;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property OrderStatus $status
+ * @property PaymentStatus $payment_status
+ * @property PaymentMethod $payment_method
+ */
 class Order extends Model
 {
     protected $fillable = [
@@ -29,6 +35,7 @@ class Order extends Model
         return [
             'status' => OrderStatus::class,
             'payment_status' => PaymentStatus::class,
+            'payment_method' => PaymentMethod::class,
             'subtotal' => 'decimal:2',
             'discount_total' => 'decimal:2',
             'delivery_charge' => 'decimal:2',

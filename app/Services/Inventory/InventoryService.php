@@ -60,7 +60,8 @@ class InventoryService
     ): StockMovement {
         return DB::transaction(function () use ($variant, $type, $delta, $reason, $actor, $orderId, $orderReturnId): StockMovement {
             $locked = ProductVariant::query()->whereKey($variant->id)->lockForUpdate()->firstOrFail();
-            $newBalance = $locked->stock + $delta;
+            $appliedDelta = $type->affectsStock() ? $delta : 0;
+            $newBalance = $locked->stock + $appliedDelta;
 
             if ($newBalance < 0) {
                 throw ValidationException::withMessages([
@@ -68,7 +69,9 @@ class InventoryService
                 ]);
             }
 
-            $locked->forceFill(['stock' => $newBalance])->save();
+            if ($appliedDelta !== 0) {
+                $locked->forceFill(['stock' => $newBalance])->save();
+            }
 
             $movement = StockMovement::create([
                 'product_variant_id' => $variant->id,

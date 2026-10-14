@@ -3,6 +3,7 @@
 namespace App\Services\Checkout;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\StockMovementType;
 use App\Models\Area;
@@ -17,6 +18,8 @@ use App\Models\OrderItem;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\Inventory\InventoryService;
+use App\Services\Notifications\OrderNotificationService;
+use App\Services\Payments\PaymentManager;
 use App\Services\Shipping\DeliveryZoneService;
 use App\Support\BdPhone;
 use App\Support\OrderNumberGenerator;
@@ -37,6 +40,8 @@ class CheckoutService
         private readonly CouponService $coupons,
         private readonly DeliveryZoneService $zones,
         private readonly InventoryService $inventory,
+        private readonly PaymentManager $payments,
+        private readonly OrderNotificationService $notifications,
     ) {}
 
     /** Builds the summary the checkout page displays (not inside a transaction — for display only). */
@@ -92,13 +97,21 @@ class CheckoutService
         $this->assertLinesStillSellable($items);
         $this->assertPricesUnchanged($items, $customerData['expected_prices'] ?? []);
 
-        return DB::transaction(function () use ($cart, $items, $customerData, $idempotencyToken, $user, $ip, $userAgent) {
+        if (! $this->payments->driver(PaymentMethod::Cod)->isEnabled()) {
+            throw ValidationException::withMessages(['cart' => 'No payment methods are currently available — please contact us.']);
+        }
+
+        $isReplay = false;
+
+        $order = DB::transaction(function () use ($cart, $items, $customerData, $idempotencyToken, $user, $ip, $userAgent, &$isReplay) {
             $token = $this->claimToken($idempotencyToken, $cart);
 
             if ($token === null) {
                 $existing = CheckoutToken::where('token', $idempotencyToken)->first();
 
                 if ($existing?->order_id) {
+                    $isReplay = true;
+
                     return Order::findOrFail($existing->order_id);
                 }
 
@@ -130,6 +143,7 @@ class CheckoutService
             $this->assertOrderValueAllowed($pricing->grandTotalPoisha);
 
             $order = $this->createOrder($items, $customerData, $district, $area, $zone, $coupon, $pricing, $user, $phone, $ip, $userAgent);
+            $this->payments->driver(PaymentMethod::Cod)->initiate($order);
 
             foreach ($items as $item) {
                 $this->inventory->recordMovement(
@@ -151,6 +165,12 @@ class CheckoutService
 
             return $order;
         }, 3);
+
+        if (! $isReplay) {
+            $this->notifications->orderPlaced($order);
+        }
+
+        return $order;
     }
 
     /**
@@ -211,14 +231,14 @@ class CheckoutService
     private function assertOrderValueAllowed(int $grandTotalPoisha): void
     {
         $min = (float) Setting::get('checkout', 'min_order_value', 0);
-        $codMax = (float) Setting::get('checkout', 'cod_max_order_value', 0);
+        $codMax = $this->payments->driver(PaymentMethod::Cod)->maxOrderValue();
         $grandTotal = $grandTotalPoisha / 100;
 
         if ($min > 0 && $grandTotal < $min) {
             throw ValidationException::withMessages(['cart' => "Minimum order value is ৳{$min}."]);
         }
 
-        if ($codMax > 0 && $grandTotal > $codMax) {
+        if ($codMax !== null && $grandTotal > $codMax) {
             throw ValidationException::withMessages(['cart' => "Maximum Cash on Delivery order value is ৳{$codMax}."]);
         }
     }
@@ -258,7 +278,7 @@ class CheckoutService
             'user_id' => $user?->id,
             'status' => OrderStatus::Pending,
             'payment_status' => PaymentStatus::Unpaid,
-            'payment_method' => 'cod',
+            'payment_method' => PaymentMethod::Cod,
             'customer_name' => $customerData['name'],
             'phone' => $phone,
             'email' => $customerData['email'] ?? null,

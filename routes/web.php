@@ -40,3 +40,4 @@ Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('thro
 Route::post('/checkout/coupon', [CheckoutController::class, 'applyCoupon'])->name('checkout.coupon.apply');
 Route::delete('/checkout/coupon', [CheckoutController::class, 'removeCoupon'])->name('checkout.coupon.remove');
 Route::get('/checkout/confirmation/{order}', [OrderConfirmationController::class, 'show'])->name('checkout.confirmation');
+Route::post('/orders/{order}/cancel', [OrderConfirmationController::class, 'cancel'])->name('orders.cancel');

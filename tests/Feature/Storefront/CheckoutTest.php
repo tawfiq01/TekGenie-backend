@@ -6,45 +6,11 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\CheckoutToken;
 use App\Models\Coupon;
-use App\Models\DeliveryZone;
 use App\Models\District;
 use App\Models\Order;
 use App\Models\User;
 use Database\Seeders\BangladeshGeoSeeder;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Str;
-
-function dhakaZone(int $baseCharge = 60, ?float $freeThreshold = null): DeliveryZone
-{
-    $zone = DeliveryZone::create(['name' => 'Inside Dhaka '.uniqid(), 'base_charge' => $baseCharge, 'free_delivery_threshold' => $freeThreshold, 'is_active' => true]);
-    District::where('name', 'Dhaka')->update(['delivery_zone_id' => $zone->id]);
-
-    return $zone;
-}
-
-function checkoutToken(Cart $cart): CheckoutToken
-{
-    return CheckoutToken::create(['token' => Str::random(40), 'cart_id' => $cart->id, 'session_id' => 'test', 'expires_at' => now()->addHours(2)]);
-}
-
-/**
- * Adds an item to a fresh guest cart and returns it along with the
- * cart_token cookie value — the test client does not persist custom
- * cookies across requests on its own, so every later guest request for
- * this same cart must resend it via withUnencryptedCookie('cart_token',
- * $cookie): the captured value is already the encrypted wire value, and
- * withCookie() would encrypt it a second time.
- *
- * @return array{0: Cart, 1: string}
- */
-function addToGuestCart(int $variantId, int $quantity): array
-{
-    $response = test()->post(route('cart.store'), ['product_variant_id' => $variantId, 'quantity' => $quantity]);
-    $cookie = collect($response->headers->getCookies())->first(fn ($c) => $c->getName() === 'cart_token');
-    $cart = Cart::whereNull('user_id')->latest('id')->first();
-
-    return [$cart, $cookie->getValue()];
-}
 
 beforeEach(function () {
     $this->seed(BangladeshGeoSeeder::class);

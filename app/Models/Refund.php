@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\RefundMethod;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/** @property RefundMethod $method */
 class Refund extends Model
 {
     protected $fillable = [
@@ -14,6 +16,7 @@ class Refund extends Model
     protected function casts(): array
     {
         return [
+            'method' => RefundMethod::class,
             'amount' => 'decimal:2',
             'refunded_at' => 'datetime',
         ];

@@ -3,6 +3,7 @@
 
     $navGroups = collect([
         ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'show' => true],
+        ['label' => 'Orders', 'route' => 'admin.orders.index', 'show' => $adminUser?->can('orders.view')],
         [
             'label' => 'Catalogue',
             'items' => collect([

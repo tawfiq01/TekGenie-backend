@@ -31,6 +31,28 @@
             <p class="mt-1"><strong class="text-ink">Payment method:</strong> Cash on Delivery</p>
         </div>
 
+        <div class="mt-6 rounded-[var(--radius-md)] border border-border p-4">
+            <h2 class="font-semibold text-ink">Order status</h2>
+            <p class="mt-1 text-sm text-ink-soft">Current status: <strong class="text-ink">{{ $order->status->label() }}</strong></p>
+
+            @if ($order->statusHistories->isNotEmpty())
+                <ul class="mt-3 space-y-1 text-sm text-ink-soft">
+                    @foreach ($order->statusHistories as $history)
+                        <li>{{ ucfirst($history->to_status) }} — {{ $history->created_at->format('Y-m-d H:i') }}</li>
+                    @endforeach
+                </ul>
+            @endif
+
+            @if ($order->status === \App\Enums\OrderStatus::Pending)
+                <form method="POST" action="{{ $cancelUrl }}" class="mt-4" onsubmit="return confirm('Cancel this order?');">
+                    @csrf
+                    <button type="submit" class="rounded-[var(--radius-pill)] border border-danger px-4 py-2 text-sm font-semibold text-danger hover:bg-danger-soft">
+                        Cancel this order
+                    </button>
+                </form>
+            @endif
+        </div>
+
         <p class="mt-6 text-sm text-ink-soft">
             You can track this order anytime using your order number and phone number.
         </p>

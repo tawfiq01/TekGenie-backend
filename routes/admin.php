@@ -13,10 +13,14 @@ use App\Http\Controllers\Admin\DeliveryZoneController;
 use App\Http\Controllers\Admin\HomeSectionController;
 use App\Http\Controllers\Admin\OptionTypeController;
 use App\Http\Controllers\Admin\OptionValueController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\OrderPaymentController;
+use App\Http\Controllers\Admin\OrderReturnController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\ProductVariantController;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -29,7 +33,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('logout', [AdminAuthController::class, 'destroy'])->name('logout');
 
         Route::get('/', function () {
-            return view('admin.dashboard');
+            return view('admin.dashboard', [
+                'failedJobsCount' => DB::table('failed_jobs')->count(),
+            ]);
         })->name('dashboard');
 
         Route::middleware('permission:staff.manage')->group(function () {
@@ -115,6 +121,33 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::middleware('permission:coupons.manage')->group(function () {
             Route::resource('coupons', CouponController::class)->only(['index', 'create', 'store', 'edit', 'update']);
+        });
+
+        Route::middleware('permission:orders.view')->group(function () {
+            Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+            Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+            Route::get('orders/{order}/packing-slip', [OrderController::class, 'packingSlip'])->name('orders.packing-slip');
+        });
+
+        Route::middleware('permission:orders.update-status')->group(function () {
+            Route::post('orders/{order}/status', [OrderController::class, 'transition'])->name('orders.status.update');
+            Route::post('orders/bulk-status', [OrderController::class, 'bulkTransition'])->name('orders.status.bulk');
+            Route::post('orders/{order}/notes', [OrderController::class, 'storeNote'])->name('orders.notes.store');
+            Route::put('orders/{order}/courier', [OrderController::class, 'updateCourier'])->name('orders.courier.update');
+            Route::put('orders/{order}/address', [OrderController::class, 'updateAddress'])->name('orders.address.update');
+        });
+
+        Route::middleware('permission:orders.cancel')->group(function () {
+            Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+        });
+
+        Route::middleware('permission:orders.returns')->group(function () {
+            Route::post('orders/{order}/returns', [OrderReturnController::class, 'store'])->name('orders.returns.store');
+        });
+
+        Route::middleware('permission:orders.payments')->group(function () {
+            Route::post('orders/{order}/collect', [OrderPaymentController::class, 'storeCollection'])->name('orders.payments.collect');
+            Route::post('orders/{order}/refunds', [OrderPaymentController::class, 'storeRefund'])->name('orders.payments.refund');
         });
     });
 });
