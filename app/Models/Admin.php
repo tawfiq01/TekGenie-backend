@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Database\Factories\AdminFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -13,7 +15,8 @@ use Spatie\Permission\Traits\HasRoles;
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class Admin extends Authenticatable
 {
-    use HasRoles, Notifiable, SoftDeletes;
+    /** @use HasFactory<AdminFactory> */
+    use HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     /** @var string */
     protected $guard_name = 'admin';
