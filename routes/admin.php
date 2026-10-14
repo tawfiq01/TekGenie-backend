@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DeliveryZoneController;
 use App\Http\Controllers\Admin\HomeSectionController;
 use App\Http\Controllers\Admin\OptionTypeController;
@@ -20,8 +21,9 @@ use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\ProductVariantController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReviewController;
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Admin\SettingController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -33,11 +35,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['auth:admin', 'admin.idle'])->group(function () {
         Route::post('logout', [AdminAuthController::class, 'destroy'])->name('logout');
 
-        Route::get('/', function () {
-            return view('admin.dashboard', [
-                'failedJobsCount' => DB::table('failed_jobs')->count(),
-            ]);
-        })->name('dashboard');
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::middleware('permission:staff.manage')->group(function () {
             Route::resource('staff', AdminStaffController::class)
@@ -156,6 +154,31 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('reviews/{review}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
             Route::post('reviews/{review}/reject', [ReviewController::class, 'reject'])->name('reviews.reject');
             Route::post('reviews/{review}/reply', [ReviewController::class, 'reply'])->name('reviews.reply');
+        });
+
+        Route::middleware('permission:reports.view')->prefix('reports')->name('reports.')->group(function () {
+            Route::get('sales', [ReportController::class, 'sales'])->name('sales');
+            Route::get('sales/export', [ReportController::class, 'exportSales'])->name('sales.export');
+            Route::get('products', [ReportController::class, 'products'])->name('products');
+            Route::get('products/export', [ReportController::class, 'exportProducts'])->name('products.export');
+            Route::get('inventory', [ReportController::class, 'inventory'])->name('inventory');
+            Route::get('inventory/export', [ReportController::class, 'exportInventory'])->name('inventory.export');
+            Route::get('coupons', [ReportController::class, 'coupons'])->name('coupons');
+            Route::get('coupons/export', [ReportController::class, 'exportCoupons'])->name('coupons.export');
+        });
+
+        Route::middleware('permission:settings.manage')->prefix('settings')->name('settings.')->group(function () {
+            Route::get('store', [SettingController::class, 'store'])->name('store');
+            Route::put('store', [SettingController::class, 'updateStore'])->name('store.update');
+            Route::get('payments', [SettingController::class, 'payments'])->name('payments');
+            Route::put('payments', [SettingController::class, 'updatePayments'])->name('payments.update');
+            Route::get('notifications', [SettingController::class, 'notifications'])->name('notifications');
+            Route::put('notifications', [SettingController::class, 'updateNotifications'])->name('notifications.update');
+        });
+
+        Route::middleware('permission:settings.seo')->prefix('settings')->name('settings.')->group(function () {
+            Route::get('seo', [SettingController::class, 'seo'])->name('seo');
+            Route::put('seo', [SettingController::class, 'updateSeo'])->name('seo.update');
         });
     });
 });

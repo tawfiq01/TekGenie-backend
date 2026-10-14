@@ -31,7 +31,7 @@ class CartService
             return $this->cart;
         }
 
-        $cart = Auth::check() ? $this->currentUserCart() : $this->currentGuestCart();
+        $cart = Auth::guard('web')->check() ? $this->currentUserCart() : $this->currentGuestCart();
         $cart->forceFill(['last_activity_at' => now()])->save();
 
         return $this->cart = $cart;
@@ -40,8 +40,8 @@ class CartService
     /** Finds the cart without creating one — for header/mini-cart display only. */
     public function peek(): ?Cart
     {
-        if (Auth::check()) {
-            return Cart::query()->where('user_id', Auth::id())->first();
+        if (Auth::guard('web')->check()) {
+            return Cart::query()->where('user_id', Auth::guard('web')->id())->first();
         }
 
         $token = request()->cookie(self::COOKIE_NAME);
@@ -145,7 +145,7 @@ class CartService
     private function currentUserCart(): Cart
     {
         return Cart::query()->firstOrCreate(
-            ['user_id' => Auth::id()],
+            ['user_id' => Auth::guard('web')->id()],
             ['token' => (string) Str::random(40)]
         );
     }

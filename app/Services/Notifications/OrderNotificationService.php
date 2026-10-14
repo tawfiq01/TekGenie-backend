@@ -17,11 +17,12 @@ use Illuminate\Support\Facades\Mail;
  */
 class OrderNotificationService
 {
-    private const STATUS_CHANGE_NOTIFIED = [
-        OrderStatus::Confirmed,
-        OrderStatus::Shipped,
-        OrderStatus::Delivered,
-        OrderStatus::Cancelled,
+    /** FR-NTF-003: the per-status setting key each notified status is individually switchable through. */
+    private const STATUS_SETTING_KEYS = [
+        'confirmed' => 'notify_confirmed',
+        'shipped' => 'notify_shipped',
+        'delivered' => 'notify_delivered',
+        'cancelled' => 'notify_cancelled',
     ];
 
     public function orderPlaced(Order $order): void
@@ -38,16 +39,28 @@ class OrderNotificationService
 
     public function statusChanged(Order $order, OrderStatus $status): void
     {
-        if (! in_array($status, self::STATUS_CHANGE_NOTIFIED, true)) {
-            return;
-        }
-
-        if (! (bool) Setting::get('notifications', 'status_change_emails_enabled', true)) {
+        if (! $this->statusEmailEnabled($status)) {
             return;
         }
 
         if ($order->email) {
             Mail::to($order->email)->queue(new OrderStatusChanged($order, $status));
         }
+    }
+
+    /**
+     * A master switch gates every status email at once; the per-status
+     * switch then lets staff turn individual statuses off without
+     * affecting the others (FR-NTF-003).
+     */
+    private function statusEmailEnabled(OrderStatus $status): bool
+    {
+        if (! (bool) Setting::get('notifications', 'status_change_emails_enabled', true)) {
+            return false;
+        }
+
+        $key = self::STATUS_SETTING_KEYS[$status->value] ?? null;
+
+        return $key !== null && (bool) Setting::get('notifications', $key, true);
     }
 }

@@ -49,7 +49,7 @@
                         <span class="text-ink">· ৳{{ $cartSummary['subtotal'] }}</span>
                     @endif
                 </a>
-                @auth
+                @auth('web')
                     <a href="{{ route('account.dashboard') }}" class="text-ink-soft hover:text-ink">My account</a>
                 @else
                     <a href="{{ route('login') }}" class="text-ink-soft hover:text-ink">Log in</a>

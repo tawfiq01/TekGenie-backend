@@ -22,7 +22,7 @@ class AddressController extends Controller
     public function index(): View
     {
         return view('account.addresses.index', [
-            'addresses' => Auth::user()->addresses()->orderByDesc('is_default')->orderByDesc('id')->get(),
+            'addresses' => Auth::guard('web')->user()->addresses()->orderByDesc('is_default')->orderByDesc('id')->get(),
         ]);
     }
 
@@ -36,7 +36,7 @@ class AddressController extends Controller
 
     public function store(StoreAddressRequest $request): RedirectResponse
     {
-        $this->addresses->create(Auth::user(), $request->validated());
+        $this->addresses->create(Auth::guard('web')->user(), $request->validated());
 
         return redirect()->route('account.addresses.index')->with('status', 'Address added.');
     }
@@ -81,7 +81,7 @@ class AddressController extends Controller
 
     private function authorizeOwner(Address $address): void
     {
-        if ($address->user_id !== Auth::id()) {
+        if ($address->user_id !== Auth::guard('web')->id()) {
             throw new NotFoundHttpException;
         }
     }

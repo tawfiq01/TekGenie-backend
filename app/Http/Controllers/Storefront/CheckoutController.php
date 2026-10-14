@@ -49,7 +49,7 @@ class CheckoutController extends Controller
             'districts' => $district ? District::where('division_id', $district->division_id)->orderBy('name')->get() : collect(),
             'selectedDistrict' => $district,
             'selectedArea' => $area,
-            'addresses' => Auth::check() ? Address::where('user_id', Auth::id())->orderByDesc('is_default')->get() : collect(),
+            'addresses' => Auth::guard('web')->check() ? Address::where('user_id', Auth::guard('web')->id())->orderByDesc('is_default')->get() : collect(),
             'token' => $this->getOrCreateToken($cart),
         ]);
     }
@@ -61,7 +61,7 @@ class CheckoutController extends Controller
         $data = $request->validated();
 
         if (! empty($data['address_id'])) {
-            $address = Address::where('id', $data['address_id'])->where('user_id', Auth::id())->firstOrFail();
+            $address = Address::where('id', $data['address_id'])->where('user_id', Auth::guard('web')->id())->firstOrFail();
             $data = array_merge($data, [
                 'name' => $address->recipient_name,
                 'phone' => $address->phone,
@@ -78,7 +78,7 @@ class CheckoutController extends Controller
                 $this->cartService->current(),
                 $data,
                 $data['token'],
-                Auth::user(),
+                Auth::guard('web')->user(),
                 $request->ip(),
                 $request->userAgent(),
             );
@@ -88,7 +88,7 @@ class CheckoutController extends Controller
 
         session()->forget('checkout.coupon_code');
 
-        if (Auth::check()) {
+        if (Auth::guard('web')->check()) {
             return redirect()->route('checkout.confirmation', $order);
         }
 

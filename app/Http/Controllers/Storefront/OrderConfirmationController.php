@@ -41,9 +41,9 @@ class OrderConfirmationController extends Controller
 
         $data = $request->validate(['reason' => ['nullable', 'string', 'max:255']]);
 
-        $this->statuses->cancelByCustomer($order, Auth::id(), $data['reason'] ?? 'Cancelled by customer');
+        $this->statuses->cancelByCustomer($order, Auth::guard('web')->id(), $data['reason'] ?? 'Cancelled by customer');
 
-        $redirectUrl = Auth::check() && $order->user_id === Auth::id()
+        $redirectUrl = Auth::guard('web')->check() && $order->user_id === Auth::guard('web')->id()
             ? route('checkout.confirmation', $order)
             : URL::temporarySignedRoute('checkout.confirmation', now()->addHours(24), ['order' => $order->id]);
 
@@ -52,7 +52,7 @@ class OrderConfirmationController extends Controller
 
     private function assertOwned(Request $request, Order $order): void
     {
-        $ownedBySession = Auth::check() && $order->user_id === Auth::id();
+        $ownedBySession = Auth::guard('web')->check() && $order->user_id === Auth::guard('web')->id();
 
         if (! $ownedBySession && ! $request->hasValidSignature()) {
             throw new NotFoundHttpException;

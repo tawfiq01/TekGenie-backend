@@ -16,7 +16,7 @@ class ReviewController extends Controller
 
     public function store(Request $request, Product $product): RedirectResponse
     {
-        $user = Auth::user();
+        $user = Auth::guard('web')->user();
 
         if (! $user->hasVerifiedEmail()) {
             abort(403, 'Please verify your email address before writing a review.');

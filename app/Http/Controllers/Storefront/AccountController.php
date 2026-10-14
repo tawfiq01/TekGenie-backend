@@ -16,24 +16,25 @@ class AccountController extends Controller
 
     public function index(): View
     {
-        $user = Auth::user();
+        $user = Auth::guard('web')->user();
 
         return view('account.dashboard', [
+            'user' => $user,
             'recentOrders' => $user->orders()->latest('placed_at')->take(5)->get(),
         ]);
     }
 
     public function profile(): View
     {
-        return view('account.profile', ['user' => Auth::user()]);
+        return view('account.profile', ['user' => Auth::guard('web')->user()]);
     }
 
     public function destroy(Request $request): RedirectResponse
     {
         $request->validate(['password' => ['required', 'current_password:web']]);
 
-        $user = Auth::user();
-        Auth::logout();
+        $user = Auth::guard('web')->user();
+        Auth::guard('web')->logout();
         $this->deletion->delete($user);
 
         $request->session()->invalidate();

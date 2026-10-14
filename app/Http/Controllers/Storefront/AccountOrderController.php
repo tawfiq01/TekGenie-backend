@@ -16,7 +16,7 @@ class AccountOrderController extends Controller
     public function index(): View
     {
         return view('account.orders.index', [
-            'orders' => Auth::user()->orders()->latest('placed_at')->paginate(10),
+            'orders' => Auth::guard('web')->user()->orders()->latest('placed_at')->paginate(10),
         ]);
     }
 }

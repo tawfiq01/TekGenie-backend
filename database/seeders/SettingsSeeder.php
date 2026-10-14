@@ -27,6 +27,8 @@ class SettingsSeeder extends Seeder
                 'low_stock_default_threshold' => '5',
                 'announcement_text' => '',
                 'announcement_link' => '',
+                'facebook_url' => '',
+                'instagram_url' => '',
             ],
             'checkout' => [
                 'min_order_value' => '0',
@@ -49,6 +51,10 @@ class SettingsSeeder extends Seeder
             'notifications' => [
                 'staff_new_order_email' => '',
                 'status_change_emails_enabled' => '1',
+                'notify_confirmed' => '1',
+                'notify_shipped' => '1',
+                'notify_delivered' => '1',
+                'notify_cancelled' => '1',
             ],
         ];
 

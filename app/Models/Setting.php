@@ -14,4 +14,9 @@ class Setting extends Model
     {
         return static::query()->where('group', $group)->where('key', $key)->value('value') ?? $default;
     }
+
+    public static function put(string $group, string $key, mixed $value, string $type = 'string'): void
+    {
+        static::query()->updateOrCreate(['group' => $group, 'key' => $key], ['value' => $value, 'type' => $type]);
+    }
 }

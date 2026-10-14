@@ -15,6 +15,15 @@
         ],
         ['label' => 'Inventory', 'route' => 'admin.inventory.index', 'show' => $adminUser?->can('inventory.adjust')],
         [
+            'label' => 'Reports',
+            'items' => collect([
+                ['label' => 'Sales', 'route' => 'admin.reports.sales', 'show' => $adminUser?->can('reports.view')],
+                ['label' => 'Products', 'route' => 'admin.reports.products', 'show' => $adminUser?->can('reports.view')],
+                ['label' => 'Inventory', 'route' => 'admin.reports.inventory', 'show' => $adminUser?->can('reports.view')],
+                ['label' => 'Coupons', 'route' => 'admin.reports.coupons', 'show' => $adminUser?->can('reports.view')],
+            ])->filter(fn ($item) => $item['show']),
+        ],
+        [
             'label' => 'Marketing',
             'items' => collect([
                 ['label' => 'Coupons', 'route' => 'admin.coupons.index', 'show' => $adminUser?->can('coupons.manage')],
@@ -27,6 +36,10 @@
             'label' => 'Settings',
             'items' => collect([
                 ['label' => 'Delivery zones', 'route' => 'admin.delivery-zones.index', 'show' => $adminUser?->can('shipping.manage')],
+                ['label' => 'Store', 'route' => 'admin.settings.store', 'show' => $adminUser?->can('settings.manage')],
+                ['label' => 'Payments', 'route' => 'admin.settings.payments', 'show' => $adminUser?->can('settings.manage')],
+                ['label' => 'Notifications', 'route' => 'admin.settings.notifications', 'show' => $adminUser?->can('settings.manage')],
+                ['label' => 'SEO', 'route' => 'admin.settings.seo', 'show' => $adminUser?->can('settings.seo')],
             ])->filter(fn ($item) => $item['show']),
         ],
         ['label' => 'Reviews', 'route' => 'admin.reviews.index', 'show' => $adminUser?->can('reviews.moderate')],

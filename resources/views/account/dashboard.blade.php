@@ -1,6 +1,6 @@
 <x-layouts.app title="My account">
     <div class="mx-auto max-w-2xl">
-        <h1 class="text-2xl font-bold text-ink">Welcome back, {{ auth()->user()->name }}</h1>
+        <h1 class="text-2xl font-bold text-ink">Welcome back, {{ $user->name }}</h1>
 
         @if (session('status'))
             <p class="mt-4 rounded-[var(--radius-sm)] bg-success-soft px-3 py-2 text-sm text-success">{{ session('status') }}</p>

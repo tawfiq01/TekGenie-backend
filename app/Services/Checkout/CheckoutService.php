@@ -24,6 +24,7 @@ use App\Services\Shipping\DeliveryZoneService;
 use App\Support\BdPhone;
 use App\Support\OrderNumberGenerator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -56,7 +57,7 @@ class CheckoutService
         if ($couponCode) {
             try {
                 $subtotalPoisha = (int) $items->sum(fn ($i) => round(((float) $i->variant->price) * 100) * $i->quantity);
-                $coupon = $this->coupons->findValid($couponCode, $subtotalPoisha, auth()->user(), $this->currentPhone());
+                $coupon = $this->coupons->findValid($couponCode, $subtotalPoisha, Auth::guard('web')->user(), $this->currentPhone());
             } catch (ValidationException $e) {
                 $couponError = $e->validator->errors()->first('coupon');
             }
@@ -327,6 +328,6 @@ class CheckoutService
 
     private function currentPhone(): string
     {
-        return (string) (auth()->user()->phone ?? '');
+        return (string) (Auth::guard('web')->user()->phone ?? '');
     }
 }

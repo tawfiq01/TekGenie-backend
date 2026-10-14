@@ -16,21 +16,21 @@ class WishlistController extends Controller
 
     public function index(): View
     {
-        $items = Auth::user()->wishlistItems()->with('product')->latest('id')->get();
+        $items = Auth::guard('web')->user()->wishlistItems()->with('product')->latest('id')->get();
 
         return view('account.wishlist', ['items' => $items]);
     }
 
     public function store(Product $product): RedirectResponse
     {
-        $added = $this->wishlist->toggle(Auth::user(), $product);
+        $added = $this->wishlist->toggle(Auth::guard('web')->user(), $product);
 
         return back()->with('status', $added ? 'Added to your wishlist.' : 'Removed from your wishlist.');
     }
 
     public function destroy(Product $product): RedirectResponse
     {
-        $this->wishlist->remove(Auth::user(), $product);
+        $this->wishlist->remove(Auth::guard('web')->user(), $product);
 
         return back()->with('status', 'Removed from your wishlist.');
     }
