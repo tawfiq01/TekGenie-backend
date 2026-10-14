@@ -10,6 +10,9 @@
 
     <form method="POST" action="{{ route('login') }}" class="mt-6 space-y-4">
         @csrf
+        @if (request('redirect'))
+            <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+        @endif
 
         <div>
             <label for="email" class="block text-sm font-medium text-ink">Email or mobile number</label>

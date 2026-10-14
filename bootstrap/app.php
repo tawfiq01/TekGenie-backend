@@ -28,6 +28,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin', 'admin/*')
             ? route('admin.login')
             : route('login'));
+
+        // FR-ACC-010: AuthenticateSession only acts on the default ('web')
+        // guard's user, so this is inert for admin-guard sessions even
+        // though routes/admin.php is wrapped in the 'web' group too.
+        $middleware->authenticateSessions();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

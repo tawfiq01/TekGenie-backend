@@ -29,6 +29,7 @@
                 ['label' => 'Delivery zones', 'route' => 'admin.delivery-zones.index', 'show' => $adminUser?->can('shipping.manage')],
             ])->filter(fn ($item) => $item['show']),
         ],
+        ['label' => 'Reviews', 'route' => 'admin.reviews.index', 'show' => $adminUser?->can('reviews.moderate')],
         [
             'label' => 'Access',
             'items' => collect([

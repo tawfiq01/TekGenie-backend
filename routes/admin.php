@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\ProductVariantController;
+use App\Http\Controllers\Admin\ReviewController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -148,6 +149,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('permission:orders.payments')->group(function () {
             Route::post('orders/{order}/collect', [OrderPaymentController::class, 'storeCollection'])->name('orders.payments.collect');
             Route::post('orders/{order}/refunds', [OrderPaymentController::class, 'storeRefund'])->name('orders.payments.refund');
+        });
+
+        Route::middleware('permission:reviews.moderate')->group(function () {
+            Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
+            Route::post('reviews/{review}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
+            Route::post('reviews/{review}/reject', [ReviewController::class, 'reject'])->name('reviews.reject');
+            Route::post('reviews/{review}/reply', [ReviewController::class, 'reply'])->name('reviews.reply');
         });
     });
 });

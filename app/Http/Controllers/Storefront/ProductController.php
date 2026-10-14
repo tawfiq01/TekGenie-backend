@@ -3,14 +3,23 @@
 namespace App\Http\Controllers\Storefront;
 
 use App\Enums\ProductStatus;
+use App\Enums\ReviewStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Services\Reviews\ReviewService;
+use App\Services\Reviews\WishlistService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/** FR-STF-005/006; FR-CAT-011. */
+/** FR-STF-005/006; FR-CAT-011; FR-WSH-001/002; FR-REV-001/003. */
 class ProductController extends Controller
 {
+    public function __construct(
+        private readonly WishlistService $wishlist,
+        private readonly ReviewService $reviews,
+    ) {}
+
     public function show(Product $product): View
     {
         $product->load(['images.optionValue', 'attributes', 'variants.optionValues.optionType', 'relatedProducts.images', 'optionTypes.values']);
@@ -22,6 +31,10 @@ class ProductController extends Controller
         $relatedProducts = $product->relatedProducts->isNotEmpty()
             ? $product->relatedProducts
             : Product::visible()->with('images')->where('category_id', $product->category_id)->where('id', '!=', $product->id)->limit(4)->get();
+
+        // Explicit guard: the storefront is always 'web', regardless of
+        // which guard a request elsewhere happens to have defaulted to.
+        $user = Auth::guard('web')->user();
 
         return view('storefront.product', [
             'product' => $product,
@@ -36,6 +49,9 @@ class ProductController extends Controller
                 'optionValueIds' => $variant->optionValues->pluck('id')->sort()->values()->all(),
                 'imageOptionValueId' => $variant->optionValues->pluck('id')->first(),
             ])->values(),
+            'isWishlisted' => $user !== null && $this->wishlist->contains($user, $product),
+            'approvedReviews' => $product->reviews()->where('status', ReviewStatus::Approved)->with('user')->latest('id')->paginate(10, pageName: 'reviews_page'),
+            'canReview' => $user !== null && $this->reviews->canReview($user, $product),
         ]);
     }
 

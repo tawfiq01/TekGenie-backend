@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -31,5 +32,10 @@ class UpdateUserPassword implements UpdatesUserPasswords
         $user->forceFill([
             'password' => Hash::make($input['password']),
         ])->save();
+
+        // FR-ACC-010: rehashes the stored password again for the
+        // AuthenticateSession sentinel, invalidating this user's other
+        // sessions the next time they hit a route guarded by it.
+        Auth::guard('web')->logoutOtherDevices($input['password']);
     }
 }
