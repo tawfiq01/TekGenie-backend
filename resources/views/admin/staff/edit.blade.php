@@ -26,6 +26,7 @@
         </div>
 
         <label class="flex items-center gap-2 text-sm text-ink-soft">
+            <input type="hidden" name="is_active" value="0">
             <input type="checkbox" name="is_active" value="1" {{ old('is_active', $staffMember->is_active) ? 'checked' : '' }}
                    class="rounded border-border">
             Active
