@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminAuditLogController;
 use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\Admin\BrandController;
@@ -78,6 +79,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('images/{productImage}', [ProductImageController::class, 'update'])->name('products.images.update');
             Route::put('images/{productImage}/main', [ProductImageController::class, 'setMain'])->name('products.images.set-main');
             Route::delete('images/{productImage}', [ProductImageController::class, 'destroy'])->name('products.images.destroy');
+        });
+
+        Route::middleware('permission:inventory.adjust')->group(function () {
+            Route::get('inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
+            Route::get('inventory/{variant}/history', [AdminInventoryController::class, 'history'])->name('inventory.history');
+            Route::post('inventory/{variant}/adjust', [AdminInventoryController::class, 'adjust'])->name('inventory.adjust');
         });
     });
 });

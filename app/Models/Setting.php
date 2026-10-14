@@ -9,4 +9,9 @@ class Setting extends Model
     public $timestamps = false;
 
     protected $fillable = ['group', 'key', 'value', 'type'];
+
+    public static function get(string $group, string $key, mixed $default = null): mixed
+    {
+        return static::query()->where('group', $group)->where('key', $key)->value('value') ?? $default;
+    }
 }

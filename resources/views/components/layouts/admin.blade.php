@@ -12,6 +12,7 @@
                 ['label' => 'Options', 'route' => 'admin.option-types.index', 'show' => $adminUser?->can('products.view')],
             ])->filter(fn ($item) => $item['show']),
         ],
+        ['label' => 'Inventory', 'route' => 'admin.inventory.index', 'show' => $adminUser?->can('inventory.adjust')],
         [
             'label' => 'Access',
             'items' => collect([
