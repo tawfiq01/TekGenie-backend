@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\ProductVariantFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,7 +12,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductVariant extends Model
 {
-    use SoftDeletes;
+    /** @use HasFactory<ProductVariantFactory> */
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'product_id', 'sku', 'barcode', 'price', 'compare_at_price', 'stock',

@@ -3,15 +3,22 @@
 namespace App\Models;
 
 use App\Enums\ProductStatus;
+use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property ProductStatus $status
+ */
 class Product extends Model
 {
-    use SoftDeletes;
+    /** @use HasFactory<ProductFactory> */
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'category_id', 'brand_id', 'name', 'slug', 'short_description', 'description',
@@ -30,6 +37,19 @@ class Product extends Model
             'rating_avg' => 'decimal:2',
             'published_at' => 'datetime',
         ];
+    }
+
+    /**
+     * FR-CAT-011: visible on the storefront only when Active with at least
+     * one active variant.
+     *
+     * @param  Builder<Product>  $query
+     * @return Builder<Product>
+     */
+    public function scopeVisible(Builder $query): Builder
+    {
+        return $query->where('status', ProductStatus::Active)
+            ->whereHas('variants', fn ($q) => $q->where('is_active', true));
     }
 
     /** @return BelongsTo<Category, $this> */

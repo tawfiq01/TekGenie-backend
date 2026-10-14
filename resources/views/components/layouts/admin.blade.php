@@ -6,6 +6,7 @@
         [
             'label' => 'Catalogue',
             'items' => collect([
+                ['label' => 'Products', 'route' => 'admin.products.index', 'show' => $adminUser?->can('products.view')],
                 ['label' => 'Categories', 'route' => 'admin.categories.index', 'show' => $adminUser?->can('products.view')],
                 ['label' => 'Brands', 'route' => 'admin.brands.index', 'show' => $adminUser?->can('products.view')],
                 ['label' => 'Options', 'route' => 'admin.option-types.index', 'show' => $adminUser?->can('products.view')],
