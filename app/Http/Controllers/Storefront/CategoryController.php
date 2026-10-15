@@ -6,15 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\OptionType;
+use App\Services\Seo\SeoMetaService;
 use App\Services\Storefront\ProductListingService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/** FR-SRC-002/003/004. */
+/** FR-SRC-002/003/004; FR-SET-002. */
 class CategoryController extends Controller
 {
-    public function __construct(private readonly ProductListingService $listing) {}
+    public function __construct(
+        private readonly ProductListingService $listing,
+        private readonly SeoMetaService $seoMeta,
+    ) {}
 
     public function all(Request $request): View
     {
@@ -37,8 +41,16 @@ class CategoryController extends Controller
         $filters = $this->filters($request);
         $filters['category_id'] = $category->id;
 
+        $seo = $this->seoMeta->forCategory($category)->withJsonLd([
+            $this->seoMeta->breadcrumbJsonLd([
+                ['name' => 'Home', 'url' => route('home')],
+                ['name' => $category->name],
+            ]),
+        ]);
+
         return view('storefront.listing', [
             'heading' => $category->name,
+            'seo' => $seo,
             'products' => $this->listing->paginate($filters),
             'category' => $category,
             'categories' => Category::query()->whereNull('parent_id')->where('is_active', true)->orderBy('name')->get(),

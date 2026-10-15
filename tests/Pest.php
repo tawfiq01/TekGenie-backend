@@ -75,6 +75,25 @@ function makeVariant(array $attributes = []): ProductVariant
     ], $attributes));
 }
 
+/**
+ * Every <loc> in a parsed sitemap.xml, as plain strings. Not
+ * collect($xml->url)->map(...): iterator_to_array() (which Collection uses
+ * under the hood) preserves keys by default, and SimpleXML keys every <url>
+ * sibling "url", so that silently collapses to the last entry only.
+ *
+ * @return array<int, string>
+ */
+function sitemapLocs(SimpleXMLElement $xml): array
+{
+    $locs = [];
+
+    foreach ($xml->url as $url) {
+        $locs[] = (string) $url->loc;
+    }
+
+    return $locs;
+}
+
 /** A delivery zone covering "Dhaka" (seeded by BangladeshGeoSeeder), for checkout/order tests. */
 function dhakaZone(int $baseCharge = 60, ?float $freeThreshold = null): DeliveryZone
 {

@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\UpdateSeoSettingsRequest;
 use App\Http\Requests\Admin\UpdateStoreSettingsRequest;
 use App\Models\Setting;
 use App\Services\Audit\AuditLogger;
+use App\Services\Seo\SitemapGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -74,9 +75,20 @@ class SettingController extends Controller
 
     public function updateSeo(UpdateSeoSettingsRequest $request): RedirectResponse
     {
-        $this->saveGroup('seo', $request->validated());
+        $data = $request->validated();
+        $data['maintenance_mode_enabled'] = $request->boolean('maintenance_mode_enabled') ? '1' : '0';
+
+        $this->saveGroup('seo', $data);
 
         return redirect()->route('admin.settings.seo')->with('status', 'SEO settings saved.');
+    }
+
+    public function regenerateSitemap(SitemapGenerator $sitemap): RedirectResponse
+    {
+        $sitemap->regenerate();
+        $this->audit->log('admin.sitemap.regenerated');
+
+        return redirect()->route('admin.settings.seo')->with('status', 'Sitemap cache cleared — it will rebuild on the next request.');
     }
 
     /** @return array<string, string> */

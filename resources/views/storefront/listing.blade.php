@@ -1,4 +1,4 @@
-<x-layouts.app :title="$heading">
+<x-layouts.app :title="$heading" :seo="$seo ?? null">
     <h1 class="text-2xl font-bold text-ink">{{ $heading }}</h1>
 
     <div class="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">

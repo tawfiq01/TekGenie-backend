@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\SlugMovedException;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -55,5 +56,24 @@ class Category extends Model
     public function coupons(): BelongsToMany
     {
         return $this->belongsToMany(Coupon::class, 'coupon_category');
+    }
+
+    /** FR-SET-005: an unresolved slug that matches a recorded old one 301s to the category's current URL instead of 404ing. */
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        $category = parent::resolveRouteBinding($value, $field);
+
+        if ($category !== null || $field !== 'slug') {
+            return $category;
+        }
+
+        $redirect = SlugRedirect::query()->where('entity_type', 'category')->where('old_slug', $value)->first();
+        $moved = $redirect ? static::find($redirect->entity_id) : null;
+
+        if ($moved) {
+            throw new SlugMovedException($moved, 'category.show');
+        }
+
+        return null;
     }
 }

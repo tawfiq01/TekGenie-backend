@@ -5,13 +5,26 @@
     $contactPhone = \App\Models\Setting::get('store', 'contact_phone');
     $contactEmail = \App\Models\Setting::get('store', 'contact_email');
     $cartSummary = app(\App\Services\Cart\CartService::class)->summary();
+    $seo = $seo ?? app(\App\Services\Seo\SeoMetaService::class)->forGeneric($title ?? config('app.name'));
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? config('app.name') }}</title>
+    <title>{{ $seo->title }}</title>
+    <meta name="description" content="{{ $seo->description }}">
+    <link rel="canonical" href="{{ $seo->canonical }}">
+    <meta property="og:title" content="{{ $seo->title }}">
+    <meta property="og:description" content="{{ $seo->description }}">
+    <meta property="og:type" content="{{ $seo->ogType }}">
+    <meta property="og:url" content="{{ $seo->canonical }}">
+    @if ($seo->ogImage)
+        <meta property="og:image" content="{{ $seo->ogImage }}">
+    @endif
+    @foreach ($seo->jsonLd as $jsonLdBlock)
+        <script type="application/ld+json">{!! json_encode($jsonLdBlock, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    @endforeach
 
     {{ Vite::fonts() }}
     @vite(['resources/css/app.css', 'resources/js/app.js'])

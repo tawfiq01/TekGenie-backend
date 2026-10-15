@@ -7,7 +7,7 @@
     ])->values();
     $mainImage = $product->images->firstWhere('is_main', true) ?? $product->images->first();
 @endphp
-<x-layouts.app :title="$product->name">
+<x-layouts.app :title="$product->name" :seo="$seo">
     <nav class="text-sm text-ink-soft">
         <a href="{{ route('category.show', $product->category) }}" class="hover:text-ink">{{ $product->category->name }}</a>
     </nav>

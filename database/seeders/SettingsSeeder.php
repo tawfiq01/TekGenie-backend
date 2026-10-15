@@ -47,6 +47,9 @@ class SettingsSeeder extends Seeder
             'seo' => [
                 'default_meta_title_pattern' => '{title} | [Store Name]',
                 'default_meta_description' => '',
+                'robots_txt_extra' => '',
+                'maintenance_mode_enabled' => '0',
+                'maintenance_secret' => '',
             ],
             'notifications' => [
                 'staff_new_order_email' => '',

@@ -179,6 +179,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('permission:settings.seo')->prefix('settings')->name('settings.')->group(function () {
             Route::get('seo', [SettingController::class, 'seo'])->name('seo');
             Route::put('seo', [SettingController::class, 'updateSeo'])->name('seo.update');
+            Route::post('seo/regenerate-sitemap', [SettingController::class, 'regenerateSitemap'])->name('seo.regenerate-sitemap');
         });
     });
 });

@@ -2,6 +2,7 @@
 
 use App\Models\Cart;
 use App\Models\Setting;
+use App\Services\Seo\SitemapGenerator;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -26,3 +27,6 @@ Schedule::call(function (): void {
 
     Cart::query()->whereNull('user_id')->where('last_activity_at', '<', now()->subDays($days))->delete();
 })->daily()->name('carts:purge-guest');
+
+/** FR-SET-003: the sitemap also rebuilds the first time it's requested after this cache clear. */
+Schedule::call(fn () => app(SitemapGenerator::class)->regenerate())->daily()->name('sitemap:regenerate');

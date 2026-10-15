@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ProductStatus;
+use App\Exceptions\SlugMovedException;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -120,5 +121,24 @@ class Product extends Model
     public function coupons(): BelongsToMany
     {
         return $this->belongsToMany(Coupon::class);
+    }
+
+    /** FR-SET-005: an unresolved slug that matches a recorded old one 301s to the product's current URL instead of 404ing. */
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        $product = parent::resolveRouteBinding($value, $field);
+
+        if ($product !== null || $field !== 'slug') {
+            return $product;
+        }
+
+        $redirect = SlugRedirect::query()->where('entity_type', 'product')->where('old_slug', $value)->first();
+        $moved = $redirect ? static::find($redirect->entity_id) : null;
+
+        if ($moved) {
+            throw new SlugMovedException($moved, 'product.show');
+        }
+
+        return null;
     }
 }

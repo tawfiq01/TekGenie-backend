@@ -8,16 +8,18 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\Reviews\ReviewService;
 use App\Services\Reviews\WishlistService;
+use App\Services\Seo\SeoMetaService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/** FR-STF-005/006; FR-CAT-011; FR-WSH-001/002; FR-REV-001/003. */
+/** FR-STF-005/006; FR-CAT-011; FR-WSH-001/002; FR-REV-001/003; FR-SET-002/006. */
 class ProductController extends Controller
 {
     public function __construct(
         private readonly WishlistService $wishlist,
         private readonly ReviewService $reviews,
+        private readonly SeoMetaService $seoMeta,
     ) {}
 
     public function show(Product $product): View
@@ -36,8 +38,18 @@ class ProductController extends Controller
         // which guard a request elsewhere happens to have defaulted to.
         $user = Auth::guard('web')->user();
 
+        $seo = $this->seoMeta->forProduct($product)->withJsonLd([
+            $this->seoMeta->productJsonLd($product),
+            $this->seoMeta->breadcrumbJsonLd([
+                ['name' => 'Home', 'url' => route('home')],
+                ['name' => $product->category->name, 'url' => route('category.show', $product->category)],
+                ['name' => $product->name],
+            ]),
+        ]);
+
         return view('storefront.product', [
             'product' => $product,
+            'seo' => $seo,
             'relatedProducts' => $relatedProducts,
             'variantsJson' => $product->variants->map(fn ($variant) => [
                 'id' => $variant->id,

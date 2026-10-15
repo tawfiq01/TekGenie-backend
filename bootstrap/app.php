@@ -1,5 +1,7 @@
 <?php
 
+use App\Exceptions\SlugMovedException;
+use App\Http\Middleware\CheckMaintenanceMode;
 use App\Http\Middleware\EnsureAdminSessionIsFresh;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -23,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role' => RoleMiddleware::class,
             'admin.idle' => EnsureAdminSessionIsFresh::class,
+            'maintenance' => CheckMaintenanceMode::class,
         ]);
 
         $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin', 'admin/*')
@@ -38,4 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // FR-SET-005: a slug that moved 301s to its current URL instead of 404ing.
+        $exceptions->render(fn (SlugMovedException $e) => redirect()->route($e->routeName, $e->entity, 301));
     })->create();
