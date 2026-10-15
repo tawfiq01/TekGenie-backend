@@ -1,5 +1,13 @@
 <?php
 
+use App\Models\Banner;
+use App\Models\Category;
+use App\Models\HomeSection;
+use App\Models\Product;
+use App\Models\ProductImage;
+use App\Models\Setting;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 return [
@@ -129,8 +137,22 @@ return [
     | storage. By default, no PHP classes will be unserialized from your
     | cache to prevent gadget chain attacks if your APP_KEY is leaked.
     |
+    | NFR-PERF-05: the cached settings/category/homepage data (see Setting,
+    | Category and HomeController) is the only thing this app caches as
+    | objects rather than scalars — explicitly allow-listed rather than
+    | reopening unserialization to arbitrary classes.
+    |
     */
 
-    'serializable_classes' => false,
+    'serializable_classes' => [
+        Collection::class,
+        EloquentCollection::class,
+        Setting::class,
+        Category::class,
+        HomeSection::class,
+        Banner::class,
+        Product::class,
+        ProductImage::class,
+    ],
 
 ];
