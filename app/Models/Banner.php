@@ -6,6 +6,7 @@ use Database\Factories\BannerFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @property Carbon|null $starts_at
@@ -29,6 +30,12 @@ class Banner extends Model
             'ends_at' => 'datetime',
             'is_active' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget('storefront.home'));
+        static::deleted(fn () => Cache::forget('storefront.home'));
     }
 
     public function isCurrentlyScheduled(): bool

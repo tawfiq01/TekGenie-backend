@@ -9,33 +9,42 @@ use App\Models\Category;
 use App\Models\HomeSection;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
-/** FR-STF-001/002. */
+/**
+ * FR-STF-001/002.
+ *
+ * NFR-PERF-05: the assembled section data is cached for 10 minutes (long
+ * enough to matter, short enough to still pick up a banner's scheduled
+ * start/end and newly-published/featured products without a save event),
+ * and invalidated immediately on any HomeSection/Banner change.
+ */
 class HomeController extends Controller
 {
     public function index(): View
     {
-        $sections = HomeSection::query()->where('is_active', true)->orderBy('sort_order')->get();
+        $result = Cache::remember('storefront.home', now()->addMinutes(10), function (): array {
+            $sections = HomeSection::query()->where('is_active', true)->orderBy('sort_order')->get();
 
-        $data = [];
+            $data = [];
 
-        foreach ($sections as $section) {
-            $data[$section->type->value] = match ($section->type) {
-                HomeSectionType::HeroBanner => $this->scheduledBanners('hero'),
-                HomeSectionType::PromoBanner => $this->scheduledBanners('promo'),
-                HomeSectionType::CategoryGrid => Category::query()->whereNull('parent_id')->where('is_active', true)->orderBy('sort_order')->limit(8)->get(),
-                HomeSectionType::FeaturedProducts => Product::visible()->with('images')->where('is_featured', true)->latest('published_at')->limit(8)->get(),
-                HomeSectionType::LatestProducts => Product::visible()->with('images')->latest('published_at')->limit(8)->get(),
-                HomeSectionType::BestSellers => Product::visible()->with('images')->orderByDesc('sold_count_30d')->limit(8)->get(),
-                HomeSectionType::TrustBadges, HomeSectionType::Newsletter => null,
-            };
-        }
+            foreach ($sections as $section) {
+                $data[$section->type->value] = match ($section->type) {
+                    HomeSectionType::HeroBanner => $this->scheduledBanners('hero'),
+                    HomeSectionType::PromoBanner => $this->scheduledBanners('promo'),
+                    HomeSectionType::CategoryGrid => Category::activeTopLevel()->take(8)->values(),
+                    HomeSectionType::FeaturedProducts => Product::visible()->with('images')->where('is_featured', true)->latest('published_at')->limit(8)->get(),
+                    HomeSectionType::LatestProducts => Product::visible()->with('images')->latest('published_at')->limit(8)->get(),
+                    HomeSectionType::BestSellers => Product::visible()->with('images')->orderByDesc('sold_count_30d')->limit(8)->get(),
+                    HomeSectionType::TrustBadges, HomeSectionType::Newsletter => null,
+                };
+            }
 
-        return view('storefront.home', [
-            'sections' => $sections,
-            'data' => $data,
-        ]);
+            return ['sections' => $sections, 'data' => $data];
+        });
+
+        return view('storefront.home', $result);
     }
 
     /** @return Collection<int, Banner> */

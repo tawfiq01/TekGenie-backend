@@ -34,7 +34,7 @@ class SearchController extends Controller
             'products' => $term !== '' ? $this->listing->paginate($filters, $term) : null,
             'category' => null,
             'searchTerm' => $term,
-            'categories' => Category::query()->whereNull('parent_id')->where('is_active', true)->orderBy('name')->get(),
+            'categories' => Category::activeTopLevel()->sortBy('name')->values(),
             'brands' => Brand::query()->where('is_active', true)->orderBy('name')->get(),
             'optionTypes' => OptionType::query()->with('values')->orderBy('sort_order')->get(),
         ]);

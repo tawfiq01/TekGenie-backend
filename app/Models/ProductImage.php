@@ -42,4 +42,20 @@ class ProductImage extends Model
     {
         return Storage::disk('public')->url("{$this->path}-fallback.jpg");
     }
+
+    /**
+     * NFR-PERF-03: a `srcset` attribute value from named sizes that share
+     * the same crop/fit mode (e.g. ['thumbnail', 'card'] — both "cover" —
+     * or ['detail', 'zoom'] — both "contain"); mixing "cover" and "contain"
+     * sizes in one srcset would offer the browser visually different crops
+     * of the "same" image.
+     *
+     * @param  array<int, string>  $sizes
+     */
+    public function srcset(array $sizes): string
+    {
+        return collect($sizes)
+            ->map(fn (string $size) => $this->url($size).' '.config("catalog.image_sizes.{$size}.width").'w')
+            ->implode(', ');
+    }
 }

@@ -26,7 +26,7 @@ class CategoryController extends Controller
             'heading' => 'Shop all',
             'products' => $this->listing->paginate($this->filters($request)),
             'category' => null,
-            'categories' => Category::query()->whereNull('parent_id')->where('is_active', true)->orderBy('name')->get(),
+            'categories' => Category::activeTopLevel()->sortBy('name')->values(),
             'brands' => Brand::query()->where('is_active', true)->orderBy('name')->get(),
             'optionTypes' => OptionType::query()->with('values')->orderBy('sort_order')->get(),
         ]);
@@ -53,7 +53,7 @@ class CategoryController extends Controller
             'seo' => $seo,
             'products' => $this->listing->paginate($filters),
             'category' => $category,
-            'categories' => Category::query()->whereNull('parent_id')->where('is_active', true)->orderBy('name')->get(),
+            'categories' => Category::activeTopLevel()->sortBy('name')->values(),
             'brands' => Brand::query()->where('is_active', true)->orderBy('name')->get(),
             'optionTypes' => OptionType::query()->with('values')->orderBy('sort_order')->get(),
         ]);

@@ -14,7 +14,7 @@ beforeEach(function () {
 
 it('stores a contact message and emails staff (FR-STF-008)', function () {
     Mail::fake();
-    Setting::where('group', 'store')->where('key', 'contact_email')->update(['value' => 'staff@example.com']);
+    Setting::updateOrCreate(['group' => 'store', 'key' => 'contact_email'], ['value' => 'staff@example.com']);
 
     $this->post(route('contact.store'), [
         'name' => 'Rahim Uddin',

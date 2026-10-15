@@ -8,11 +8,16 @@
                     @if ($items && $items->isNotEmpty())
                         <section>
                             @foreach ($items as $banner)
+                                @php($isLcpCandidate = $loop->parent->first && $loop->first)
                                 <a href="{{ $banner->link_url ?? '#' }}" class="block overflow-hidden rounded-[var(--radius-xl)] bg-bg-subtle">
                                     <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($banner->image_desktop_path) }}"
-                                         alt="{{ $banner->alt_text }}" class="hidden w-full sm:block">
+                                         alt="{{ $banner->alt_text }}" class="hidden w-full sm:block"
+                                         loading="{{ $isLcpCandidate ? 'eager' : 'lazy' }}"
+                                         @if ($isLcpCandidate) fetchpriority="high" @endif>
                                     <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($banner->image_mobile_path ?? $banner->image_desktop_path) }}"
-                                         alt="{{ $banner->alt_text }}" class="w-full sm:hidden">
+                                         alt="{{ $banner->alt_text }}" class="w-full sm:hidden"
+                                         loading="{{ $isLcpCandidate ? 'eager' : 'lazy' }}"
+                                         @if ($isLcpCandidate) fetchpriority="high" @endif>
                                 </a>
                             @endforeach
                         </section>
@@ -31,7 +36,7 @@
                                     <a href="{{ route('category.show', $category) }}" class="text-center">
                                         <div class="aspect-square overflow-hidden rounded-[var(--radius-md)] bg-bg-subtle">
                                             @if ($category->image_path)
-                                                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($category->image_path) }}" alt="{{ $category->name }}" class="h-full w-full object-cover">
+                                                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($category->image_path) }}" alt="{{ $category->name }}" loading="lazy" class="h-full w-full object-cover">
                                             @endif
                                         </div>
                                         <p class="mt-1 text-xs text-ink-soft">{{ $category->name }}</p>

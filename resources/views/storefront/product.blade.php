@@ -1,6 +1,7 @@
 @php
     $imagesJson = $product->images->map(fn ($image) => [
         'url' => $image->url('detail'),
+        'srcset' => $image->srcset(['detail', 'zoom']),
         'cardUrl' => $image->url('card'),
         'altText' => $image->alt_text ?? $product->name,
         'optionValueId' => $image->option_value_id,
@@ -18,6 +19,7 @@
             images: {{ Illuminate\Support\Js::from($imagesJson) }},
             selected: {},
             activeImage: {{ Illuminate\Support\Js::from($mainImage?->url('detail')) }},
+            activeSrcset: {{ Illuminate\Support\Js::from($mainImage?->srcset(['detail', 'zoom'])) }},
             activeTab: 'description',
             get currentVariant() {
                 const ids = Object.values(this.selected).filter(v => v).map(Number).sort((a, b) => a - b);
@@ -31,7 +33,7 @@
             select(optionTypeId, valueId) {
                 this.selected[optionTypeId] = valueId;
                 const match = this.images.find(img => img.optionValueId === valueId);
-                if (match) this.activeImage = match.url;
+                if (match) { this.activeImage = match.url; this.activeSrcset = match.srcset; }
             },
             stockLabel() {
                 const v = this.currentVariant;
@@ -45,15 +47,18 @@
         <div>
             <div class="aspect-square overflow-hidden rounded-[var(--radius-lg)] bg-bg-subtle">
                 <template x-if="activeImage">
-                    <img :src="activeImage" alt="{{ $product->name }}" class="h-full w-full object-cover">
+                    <img :src="activeImage" :srcset="activeSrcset" sizes="(min-width: 1024px) 50vw, 100vw"
+                         width="800" height="800" fetchpriority="high"
+                         alt="{{ $product->name }}" class="h-full w-full object-cover">
                 </template>
             </div>
             @if ($product->images->count() > 1)
                 <div class="mt-3 grid grid-cols-5 gap-2">
                     @foreach ($product->images as $image)
-                        <button type="button" @click="activeImage = {{ Illuminate\Support\Js::from($image->url('detail')) }}"
+                        <button type="button"
+                                @click="activeImage = {{ Illuminate\Support\Js::from($image->url('detail')) }}; activeSrcset = {{ Illuminate\Support\Js::from($image->srcset(['detail', 'zoom'])) }}"
                                 class="aspect-square overflow-hidden rounded-[var(--radius-sm)] border border-border">
-                            <img src="{{ $image->url('thumbnail') }}" alt="{{ $image->alt_text }}" class="h-full w-full object-cover">
+                            <img src="{{ $image->url('thumbnail') }}" width="150" height="150" loading="lazy" alt="{{ $image->alt_text }}" class="h-full w-full object-cover">
                         </button>
                     @endforeach
                 </div>

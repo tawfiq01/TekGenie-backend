@@ -24,7 +24,7 @@ class ProductController extends Controller
 
     public function show(Product $product): View
     {
-        $product->load(['images.optionValue', 'attributes', 'variants.optionValues.optionType', 'relatedProducts.images', 'optionTypes.values']);
+        $product->load(['category', 'brand', 'images.optionValue', 'attributes', 'variants.optionValues.optionType', 'relatedProducts.images', 'optionTypes.values']);
 
         if (! $this->isVisible($product)) {
             throw new NotFoundHttpException;

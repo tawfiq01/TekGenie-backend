@@ -13,7 +13,7 @@ beforeEach(function () {
 
 it('renders only active home sections, in order (FR-STF-001)', function () {
     Category::factory()->create();
-    HomeSection::where('type', HomeSectionType::BestSellers->value)->update(['is_active' => false]);
+    HomeSection::where('type', HomeSectionType::BestSellers->value)->first()->update(['is_active' => false]);
 
     $response = $this->get(route('home'));
 

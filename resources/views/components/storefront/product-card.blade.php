@@ -1,12 +1,18 @@
-@props(['product'])
+@props(['product', 'lazy' => true])
 
 @php($mainImage = $product->images->firstWhere('is_main', true) ?? $product->images->first())
 
 <a href="{{ route('product.show', $product) }}" class="group block">
     <div class="aspect-square overflow-hidden rounded-[var(--radius-md)] bg-bg-subtle">
         @if ($mainImage)
-            <img src="{{ $mainImage->url('card') }}" alt="{{ $mainImage->alt_text ?? $product->name }}"
-                 class="h-full w-full object-cover transition group-hover:scale-105">
+            <img
+                src="{{ $mainImage->url('card') }}"
+                srcset="{{ $mainImage->srcset(['thumbnail', 'card']) }}"
+                sizes="(min-width: 1024px) 23vw, (min-width: 640px) 31vw, 45vw"
+                width="400" height="400"
+                loading="{{ $lazy ? 'lazy' : 'eager' }}"
+                alt="{{ $mainImage->alt_text ?? $product->name }}"
+                class="h-full w-full object-cover transition group-hover:scale-105">
         @else
             <div class="flex h-full w-full items-center justify-center text-sm text-muted">No image</div>
         @endif

@@ -4,17 +4,21 @@ namespace App\Models;
 
 use App\Exceptions\SlugMovedException;
 use Database\Factories\CategoryFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */
     use HasFactory, SoftDeletes;
+
+    private const TOP_LEVEL_CACHE_KEY = 'storefront.categories.top-level';
 
     protected $fillable = [
         'parent_id', 'name', 'slug', 'description', 'image_path',
@@ -26,6 +30,29 @@ class Category extends Model
         return [
             'is_active' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget(self::TOP_LEVEL_CACHE_KEY));
+        static::deleted(fn () => Cache::forget(self::TOP_LEVEL_CACHE_KEY));
+    }
+
+    /**
+     * NFR-PERF-05: the active top-level category list, reused by the shop
+     * sidebar filters and the homepage category grid — cached for 10
+     * minutes (matching the homepage cache) and invalidated immediately on
+     * any category change.
+     *
+     * @return Collection<int, static>
+     */
+    public static function activeTopLevel(): Collection
+    {
+        return Cache::remember(
+            self::TOP_LEVEL_CACHE_KEY,
+            now()->addMinutes(10),
+            fn () => static::query()->whereNull('parent_id')->where('is_active', true)->orderBy('sort_order')->get()
+        );
     }
 
     /** @return BelongsTo<Category, $this> */
